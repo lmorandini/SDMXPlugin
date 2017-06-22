@@ -23,33 +23,54 @@
 
 import os
 
-from PyQt4 import QtGui, uic 
-from qgis.core import QgsProject
+from PyQt4 import QtGui, uic
+from qgis.core import QgsProject , QgsMessageLog
 from conn_dialog import SDMXConnectionDialog
+from wfs_conn import WFSConnection
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), 'ui/sdmx_dialog_base.ui'))
+PLUGIN_NAME = "SDMXPlugin"
 
 class SDMXPluginDialog(QtGui.QDialog, FORM_CLASS):
+
     def __init__(self, parent=None):
         """Constructor."""
         self.proj = QgsProject.instance()
         super(SDMXPluginDialog, self).__init__(parent)
         self.setupUi(self)
-        self.wfsExpr.setText(self.readSetting("test"))
+        # TODO: hard-coded for the time being
+        self.activeWfsConn = WFSConnection("http://130.56.253.19/geoserver/wfs" , "", "")
 
-        # Set up the user interface from Designer.
-        # After setupUI you can access any designer object by doing
-        # self.<objectname>, and you can use autoconnect slots - see
-        # http://qt-project.org/doc/qt-4.8/designer-using-a-ui-file.html
-        # #widgets-and-dialogs-with-auto-connect
+        # Load connections data, if saved in the project
+        # TODO
+        """
+        for i in range(0, self.cmbConnections.count()):
+          self.cmbServers.itemText(i)
+          
+        self.readSetting("test")
+        """
 
     def newConnection(self):
         SDMXConnectionDialog(self).show()
-        self.wfsExpr.setText(self.readSetting("test") + self.readSetting("test"))
+
+    def connect(self):
+        self.treeCubes.clear()
+        for cube in self.activeWfsConn.getCubes():
+          self.treeCubes.insertTopLevelItem(0,
+            QtGui.QTreeWidgetItem(self.treeCubes, (cube.ns, cube.name, cube.featureType)))
+
+    def fillDimensions(self):
+        cubeName= self.treeCubes.selectedItems()[0].text(2)
+        QgsMessageLog.logMessage(cubeName, PLUGIN_NAME, QgsMessageLog.INFO)
+        self.treeDimensions.clear()
+        for dim in self.activeWfsConn.getCubeDimensions(cubeName):
+          QgsMessageLog.logMessage(dim.name, PLUGIN_NAME, QgsMessageLog.INFO)
+          self.treeDimensions.insertTopLevelItem(0,
+            QtGui.QTreeWidgetItem(self.treeDimensions, (dim.ns, dim.name, dim.featureType)))
 
     def readSetting(self, propName):
-        return self.proj.readEntry("SDMXPlugin", propName)[0]
+        return self.proj.readEntry(PLUGIN_NAME, propName)[0]
 
     def writeSetting(self, propName, propValue):
-        self.proj.writeEntry("SDMXPlugin", propName, propValue)
+        self.proj.writeEntry(PLUGIN_NAME, propName, propValue)

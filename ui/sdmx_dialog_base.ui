@@ -28,13 +28,13 @@
             <number>0</number>
           </property>
 
-          <widget class="QWidget" name="tabServers">
+          <widget class="QWidget" name="tabConnections">
             <attribute name="title">
               <string>Servers</string>
             </attribute>
             <layout class="QGridLayout" name="gridLayout">
               <item row="0" column="0" colspan="3">
-                <widget class="QComboBox" name="cmbServers" />
+                <widget class="QComboBox" name="cmbConnections" />
               </item>
               <item row="1" column="0">
                 <widget class="QPushButton" name="btnNew">
@@ -58,9 +58,9 @@
                 </widget>
               </item>
               <item row="2" column="0" colspan="3">
-                <widget class="QTreeWidget" name="treeRecords">
+                <widget class="QTreeWidget" name="treeCubes">
                   <property name="toolTip">
-                    <string>Click to select the member</string>
+                    <string>Click to select the cube</string>
                   </property>
                   <property name="editTriggers">
                     <set>QAbstractItemView::NoEditTriggers</set>
@@ -85,12 +85,12 @@
                   </attribute>
                   <column>
                     <property name="text">
-                      <string>Dimension</string>
+                      <string>Namespace</string>
                     </property>
                   </column>
                   <column>
                     <property name="text">
-                      <string>Member</string>
+                      <string>Cube name</string>
                     </property>
                   </column>
                 </widget>
@@ -104,7 +104,7 @@
             </attribute>
             <layout class="QGridLayout" name="gridLayout">
               <item row="2" column="0" colspan="3">
-                <widget class="QTreeWidget" name="treeRecords">
+                <widget class="QTreeWidget" name="treeDimensions">
                   <property name="toolTip">
                     <string>Click to select the member</string>
                   </property>
@@ -187,6 +187,18 @@
       <signal>clicked()</signal>
       <receiver>SDMXPluginDialog</receiver>
       <slot>newConnection()</slot>
+    </connection>
+    <connection>
+      <sender>btnConnect</sender>
+      <signal>clicked()</signal>
+      <receiver>SDMXPluginDialog</receiver>
+      <slot>connect()</slot>
+    </connection>
+    <connection>
+      <sender>treeCubes</sender>
+      <signal>itemSelectionChanged()</signal>
+      <receiver>SDMXPluginDialog</receiver>
+      <slot>fillDimensions()</slot>
     </connection>
   </connections>
 
