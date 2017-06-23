@@ -85,7 +85,7 @@
                   </attribute>
                   <column>
                     <property name="text">
-                      <string>Namespace</string>
+                      <string>State</string>
                     </property>
                   </column>
                   <column>
@@ -118,7 +118,7 @@
                     <bool>false</bool>
                   </property>
                   <property name="itemsExpandable">
-                    <bool>false</bool>
+                    <bool>true</bool>
                   </property>
                   <property name="sortingEnabled">
                     <bool>False</bool>
@@ -129,6 +129,11 @@
                   <attribute name="headerStretchLastSection">
                     <bool>true</bool>
                   </attribute>
+                  <column>
+                    <property name="text">
+                      <string>State</string>
+                    </property>
+                  </column>
                   <column>
                     <property name="text">
                       <string>Dimension</string>
@@ -196,9 +201,15 @@
     </connection>
     <connection>
       <sender>treeCubes</sender>
+      <signal>itemClicked()</signal>
+      <receiver>SDMXPluginDialog</receiver>
+      <slot>cubeItemSelected()</slot>
+    </connection>
+    <connection>
+      <sender>treeDimensions</sender>
       <signal>itemSelectionChanged()</signal>
       <receiver>SDMXPluginDialog</receiver>
-      <slot>fillDimensions()</slot>
+      <slot>dimItemSelected()</slot>
     </connection>
   </connections>
 

@@ -40,8 +40,7 @@ class SDMXPluginDialog(QtGui.QDialog, FORM_CLASS):
         super(SDMXPluginDialog, self).__init__(parent)
         self.setupUi(self)
         # TODO: hard-coded for the time being
-        self.activeWfsConn = WFSConnection("http://130.56.253.19/geoserver/wfs" , "", "")
-
+        self.activeWfsConn = WFSConnection("http://130.56.253.19/geoserver/wfs" , "", "", PLUGIN_NAME)
         # Load connections data, if saved in the project
         # TODO
         """
@@ -51,23 +50,70 @@ class SDMXPluginDialog(QtGui.QDialog, FORM_CLASS):
         self.readSetting("test")
         """
 
+    def cubeItemSelected(self, item, column):
+          QgsMessageLog.logMessage("*** 100 " + str(item), PLUGIN_NAME, QgsMessageLog.INFO)  # XXX
+
+    def dimItemSelected(self):
+          QgsMessageLog.logMessage("*** 100 " + str(item), PLUGIN_NAME, QgsMessageLog.INFO)  # XXX
+      
     def newConnection(self):
         SDMXConnectionDialog(self).show()
+
+        # SP_TitleBarCloseButton
+        # SP_TitleBarMinButton
 
     def connect(self):
         self.treeCubes.clear()
         for cube in self.activeWfsConn.getCubes():
-          self.treeCubes.insertTopLevelItem(0,
-            QtGui.QTreeWidgetItem(self.treeCubes, (cube.ns, cube.name, cube.featureType)))
+          QgsMessageLog.logMessage("*** 100 " + str(cube), PLUGIN_NAME, QgsMessageLog.INFO)  # XXX
+          item = QtGui.QTreeWidgetItem(self.treeCubes)
+          item.setIcon(0, self.style().standardIcon(QtGui.QStyle.SP_ArrowRight))
+          item.setText(1, cube.name)
+          item.setData(0, 0, cube)
+          self.treeCubes.insertTopLevelItem(0, item)
 
     def fillDimensions(self):
-        cubeName= self.treeCubes.selectedItems()[0].text(2)
-        QgsMessageLog.logMessage(cubeName, PLUGIN_NAME, QgsMessageLog.INFO)
+      
+        if len(self.treeCubes.selectedItems()) < 1:
+          return
+
+        # TODO: Change icon of de-selected cubes
+        cubeItem = self.treeCubes.selectedItems()[0]
+        cubeItem.setIcon(0, self.style().standardIcon(QtGui.QStyle.SP_ArrowDown))
+
+        cube = cubeItem.data(0, 0)
+        QgsMessageLog.logMessage("*** " + cube.__class__.__name__, PLUGIN_NAME, QgsMessageLog.INFO)  # XXX
+
         self.treeDimensions.clear()
-        for dim in self.activeWfsConn.getCubeDimensions(cubeName):
-          QgsMessageLog.logMessage(dim.name, PLUGIN_NAME, QgsMessageLog.INFO)
-          self.treeDimensions.insertTopLevelItem(0,
-            QtGui.QTreeWidgetItem(self.treeDimensions, (dim.ns, dim.name, dim.featureType)))
+        for dim in self.activeWfsConn.getCubeDimensions(cube):
+          item = QtGui.QTreeWidgetItem(self.treeDimensions)
+          item.setIcon(0, self.style().standardIcon(QtGui.QStyle.SP_ArrowRight))
+          item.setText(1, dim.name)
+          item.setData(0, 0, dim)
+          self.treeDimensions.insertTopLevelItem(0, item)
+
+    def fillMembers(self):
+
+        if len(self.treeDimensions.selectedItems()) < 1:
+          return
+
+        subTree = self.treeDimensions.selectedItems()[0]
+        # TODO: Change icon of de-selected dimension
+        subTree.setIcon(0, self.style().standardIcon(QtGui.QStyle.SP_ArrowDown))
+
+        if subTree.childCount() > 0:
+          subTree.setExpanded(True)
+          return
+
+        dim = subTree.data(0, 0)
+        for m in self.activeWfsConn.getDimensionMembers(dim).members:
+          QgsMessageLog.logMessage("*** 500 " + str(m), PLUGIN_NAME, QgsMessageLog.INFO)  # XXX
+          item = QtGui.QTreeWidgetItem(subTree)
+          item.setText(2, m.value)
+          item.setData(0, 0, m)
+          subTree.addChild(item)
+          
+        subTree.setExpanded(True)
 
     def readSetting(self, propName):
         return self.proj.readEntry(PLUGIN_NAME, propName)[0]
