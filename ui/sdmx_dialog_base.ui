@@ -201,15 +201,21 @@
     </connection>
     <connection>
       <sender>treeCubes</sender>
-      <signal>itemClicked()</signal>
+      <signal>itemClicked(QTreeWidgetItem*, int)</signal>
       <receiver>SDMXPluginDialog</receiver>
       <slot>cubeItemSelected()</slot>
     </connection>
     <connection>
       <sender>treeDimensions</sender>
-      <signal>itemSelectionChanged()</signal>
+      <signal>itemClicked(QTreeWidgetItem*, int)</signal>
       <receiver>SDMXPluginDialog</receiver>
       <slot>dimItemSelected()</slot>
+    </connection>
+    <connection>
+      <sender>tabWidget</sender>
+      <signal>currentChanged(int)</signal>
+      <receiver>SDMXPluginDialog</receiver>
+      <slot>exprShown()</slot>
     </connection>
   </connections>
 

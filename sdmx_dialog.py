@@ -21,7 +21,7 @@
  ***************************************************************************/
 """
 
-import os
+import os, functools
 
 from PyQt4 import QtGui, uic
 from qgis.core import QgsProject , QgsMessageLog
@@ -49,71 +49,107 @@ class SDMXPluginDialog(QtGui.QDialog, FORM_CLASS):
           
         self.readSetting("test")
         """
-
+        self.activeCube= None
+        self.activeDims= set()
+        self.activeMembers= dict()
+        
     def cubeItemSelected(self, item, column):
-          QgsMessageLog.logMessage("*** 100 " + str(item), PLUGIN_NAME, QgsMessageLog.INFO)  # XXX
-
-    def dimItemSelected(self):
-          QgsMessageLog.logMessage("*** 100 " + str(item), PLUGIN_NAME, QgsMessageLog.INFO)  # XXX
+        QgsMessageLog.logMessage("*** cubeItemSelected " + item.data(0,0 ).__class__.__name__, PLUGIN_NAME, QgsMessageLog.INFO)  # XXX
+        # TODO: all non-selected cubes must have the icon changed
+        if item.isExpanded():
+          item.setIcon(0, self.style().standardIcon(QtGui.QStyle.SP_FileIcon))
+          item.setExpanded(False)
+          self.activeCube= None 
+        else:
+          item.setIcon(0, self.style().standardIcon(QtGui.QStyle.SP_DialogApplyButton))
+          item.setExpanded(True)
+          self.activeCube=item.data(0, 0) 
+          
+        self.fillDimensions(item)
+      
+    def dimItemSelected(self, item, column):
+        if item.data(0,0 ).__class__.__name__ == "Dimension":
+          if item.childCount() == 0:
+            self.fillMembers(item)
+            
+          if item.isExpanded():
+            item.setIcon(0, self.style().standardIcon(QtGui.QStyle.SP_DirClosedIcon))
+            item.setExpanded(False)
+            self.activeDims.remove(item.data(0, 0))
+          else:
+            item.setIcon(0, self.style().standardIcon(QtGui.QStyle.SP_FileDialogStart))
+            item.setExpanded(True)
+            self.activeDims.add(item.data(0, 0))
+            QgsMessageLog.logMessage("*** dimItemSelected1 " + item.data(0,0 ).__class__.__name__, PLUGIN_NAME, QgsMessageLog.INFO)  # XXX
+        else:
+          if item.isExpanded():
+            item.setIcon(0, self.style().standardIcon(QtGui.QStyle.SP_CustomBase))
+            item.setExpanded(False)
+            if item.data(0, 0).dim in self.activeMembers.keys():
+              self.activeMembers[item.data(0, 0).dim].remove(item.data(0, 0))
+          else:
+            item.setIcon(0, self.style().standardIcon(QtGui.QStyle.SP_DialogApplyButton))
+            item.setExpanded(True)
+            QgsMessageLog.logMessage("*** dimItemSelected2 " + item.data(0, 0).__class__.__name__ + " " + item.data(0, 0).dim.name , PLUGIN_NAME, QgsMessageLog.INFO)  # XXX
+            if item.data(0, 0).dim.name not in self.activeMembers.keys():
+              self.activeMembers[item.data(0, 0).dim.name]= set()
+            self.activeMembers[item.data(0, 0).dim.name].add(item.data(0, 0))
+              
+#            self.selectMember(item)
       
     def newConnection(self):
+        QgsMessageLog.logMessage("*** newConnection ", PLUGIN_NAME, QgsMessageLog.INFO)  # XXX
         SDMXConnectionDialog(self).show()
-
-        # SP_TitleBarCloseButton
-        # SP_TitleBarMinButton
 
     def connect(self):
         self.treeCubes.clear()
         for cube in self.activeWfsConn.getCubes():
-          QgsMessageLog.logMessage("*** 100 " + str(cube), PLUGIN_NAME, QgsMessageLog.INFO)  # XXX
+          QgsMessageLog.logMessage("*** connect " + str(cube), PLUGIN_NAME, QgsMessageLog.INFO)  # XXX
           item = QtGui.QTreeWidgetItem(self.treeCubes)
-          item.setIcon(0, self.style().standardIcon(QtGui.QStyle.SP_ArrowRight))
           item.setText(1, cube.name)
           item.setData(0, 0, cube)
           self.treeCubes.insertTopLevelItem(0, item)
 
-    def fillDimensions(self):
-      
-        if len(self.treeCubes.selectedItems()) < 1:
-          return
-
-        # TODO: Change icon of de-selected cubes
-        cubeItem = self.treeCubes.selectedItems()[0]
-        cubeItem.setIcon(0, self.style().standardIcon(QtGui.QStyle.SP_ArrowDown))
-
+    def fillDimensions(self, cubeItem):
         cube = cubeItem.data(0, 0)
-        QgsMessageLog.logMessage("*** " + cube.__class__.__name__, PLUGIN_NAME, QgsMessageLog.INFO)  # XXX
+        QgsMessageLog.logMessage("*** fillDimensions " + cube.__class__.__name__, PLUGIN_NAME, QgsMessageLog.INFO)  # XXX
 
         self.treeDimensions.clear()
         for dim in self.activeWfsConn.getCubeDimensions(cube):
           item = QtGui.QTreeWidgetItem(self.treeDimensions)
-          item.setIcon(0, self.style().standardIcon(QtGui.QStyle.SP_ArrowRight))
+          item.setIcon(0, self.style().standardIcon(QtGui.QStyle.SP_DirClosedIcon))
           item.setText(1, dim.name)
           item.setData(0, 0, dim)
           self.treeDimensions.insertTopLevelItem(0, item)
 
-    def fillMembers(self):
-
-        if len(self.treeDimensions.selectedItems()) < 1:
-          return
-
-        subTree = self.treeDimensions.selectedItems()[0]
-        # TODO: Change icon of de-selected dimension
-        subTree.setIcon(0, self.style().standardIcon(QtGui.QStyle.SP_ArrowDown))
-
-        if subTree.childCount() > 0:
-          subTree.setExpanded(True)
-          return
-
+    def fillMembers(self, subTree):
         dim = subTree.data(0, 0)
         for m in self.activeWfsConn.getDimensionMembers(dim).members:
-          QgsMessageLog.logMessage("*** 500 " + str(m), PLUGIN_NAME, QgsMessageLog.INFO)  # XXX
+          QgsMessageLog.logMessage("*** fillMembers " + str(m), PLUGIN_NAME, QgsMessageLog.INFO)  # XXX
           item = QtGui.QTreeWidgetItem(subTree)
           item.setText(2, m.value)
           item.setData(0, 0, m)
           subTree.addChild(item)
-          
-        subTree.setExpanded(True)
+
+    def selectMember(self, member):
+        value = member.data(0, 0)
+        QgsMessageLog.logMessage("*** selectMember " + str(value), PLUGIN_NAME, QgsMessageLog.INFO)  # XXX
+
+    def exprShown(self, tabNumber):
+        if tabNumber != 2:
+          return
+        QgsMessageLog.logMessage("*** exprShown " + str(tabNumber), PLUGIN_NAME, QgsMessageLog.INFO)  # XXX
+        if self.activeCube != None:
+          exprDims= list()
+          for dim in self.activeDims:
+            exprMembers= list()
+            if dim.name in self.activeMembers.keys():
+              for m in self.activeMembers[dim.name]:
+                exprMembers.append("'" + m.value + "'")
+                exprDims.append(dim.name + " in (" + ",".join(exprMembers) + ")" )
+          cqlExpr= " and ".join(exprDims) 
+          QgsMessageLog.logMessage("*** exprShown " + cqlExpr, PLUGIN_NAME, QgsMessageLog.INFO)  # XXX
+          self.wfsExpr.setText(cqlExpr)
 
     def readSetting(self, propName):
         return self.proj.readEntry(PLUGIN_NAME, propName)[0]

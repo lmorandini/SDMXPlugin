@@ -31,8 +31,9 @@ class Members():
         self.members = list()
 
 class Member():
-    def __init__(self, codeIn="", valueIn=""):
+    def __init__(self, dimIn="", codeIn="", valueIn=""):
         """Constructor."""
+        self.dim = dimIn
         self.code = codeIn
         self.value = valueIn
 
@@ -99,7 +100,7 @@ class WFSConnection():
         features = lxml.etree.XML(resp.content).find(".//{http://www.opengis.net/gml}featureMembers")
         m = Members(dim)
         for feat in features:
-          m.members.append(Member(feat[0].text, feat[1].text))
+          m.members.append(Member(dim, feat[0].text, feat[1].text))
 
         return m
 
