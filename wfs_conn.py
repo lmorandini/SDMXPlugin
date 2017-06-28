@@ -86,7 +86,7 @@ class WFSConnection():
 
     def getFeatureURL(self, featureType, cqlExpr):
       req = requests.Request("GET", self.url, params={"request":"GetFeature", "version":"1.1.0", 
-                                                      "service":"wfs", "typeName":featureType, "cql_filter": cqlExpr})
+                                                      "service":"wfs", "outputFormat":"csv","typeName":featureType, "cql_filter": cqlExpr})
       proxies= dict()
       proxies[self.url.split("://")[0]]= self.url.split("//")[1]
       return requests.adapters.HTTPAdapter().request_url(requests.Session().prepare_request(req), proxies)
@@ -109,5 +109,6 @@ class WFSConnection():
         for feat in features:
           m.members.append(Member(dim, feat[0].text, feat[1].text))
 
+        m.members.sort(key=lambda m: m.value)
         return m
 

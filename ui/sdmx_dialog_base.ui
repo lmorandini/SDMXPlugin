@@ -121,27 +121,27 @@
                     <bool>true</bool>
                   </property>
                   <property name="sortingEnabled">
-                    <bool>False</bool>
+                    <bool>True</bool>
                   </property>
                   <property name="allColumnsShowFocus">
                     <bool>true</bool>
                   </property>
                   <attribute name="headerStretchLastSection">
-                    <bool>true</bool>
+                    <bool>false</bool>
                   </attribute>
                   <column>
                     <property name="text">
-                      <string>State</string>
-                    </property>
-                  </column>
-                  <column>
-                    <property name="text">
-                      <string>Dimension</string>
+                      <string> </string>
                     </property>
                   </column>
                   <column>
                     <property name="text">
                       <string>Member</string>
+                    </property>
+                  </column>
+                  <column>
+                    <property name="text">
+                      <string>Code</string>
                     </property>
                   </column>
                 </widget>

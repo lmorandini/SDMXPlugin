@@ -130,7 +130,8 @@ class SDMXPluginDialog(QtGui.QDialog, FORM_CLASS):
         for m in self.activeWfsConn.getDimensionMembers(dim).members:
           QgsMessageLog.logMessage("*** fillMembers " + str(m), PLUGIN_NAME, QgsMessageLog.INFO)  # XXX
           item = QtGui.QTreeWidgetItem(subTree)
-          item.setText(2, m.value)
+          item.setText(1, m.value)
+          item.setText(2, m.code)
           item.setData(0, 0, m)
           subTree.addChild(item)
 
