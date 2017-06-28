@@ -84,6 +84,13 @@ class WFSConnection():
           self.dimensions[cube.featureType] = filter(lambda m: m.cubeName == cube.name and m.ns == cube.ns,
               allDimensions)
 
+    def getFeatureURL(self, featureType, cqlExpr):
+      req = requests.Request("GET", self.url, params={"request":"GetFeature", "version":"1.1.0", 
+                                                      "service":"wfs", "typeName":featureType, "cql_filter": cqlExpr})
+      proxies= dict()
+      proxies[self.url.split("://")[0]]= self.url.split("//")[1]
+      return requests.adapters.HTTPAdapter().request_url(requests.Session().prepare_request(req), proxies)
+
     def getCubes(self):
         # Returns a list of SDMX cubes
         return self.cubes
@@ -94,7 +101,7 @@ class WFSConnection():
         return self.dimensions[cube.featureType]
 
     def getDimensionMembers(self, dim):
-        # Returns a list of SDMX members for a given dimension 
+        # Returns a list of SDMX members for a given dimension
         resp = requests.get(self.url, auth=self.auth,
                 params={"request":"GetFeature", "version":"1.1.0", "service":"wfs", "typeName":dim.featureType})
         features = lxml.etree.XML(resp.content).find(".//{http://www.opengis.net/gml}featureMembers")

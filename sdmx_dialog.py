@@ -64,14 +64,16 @@ class SDMXPluginDialog(QtGui.QDialog, FORM_CLASS):
           item.setIcon(0, self.style().standardIcon(QtGui.QStyle.SP_DialogApplyButton))
           item.setExpanded(True)
           self.activeCube=item.data(0, 0) 
-          
+
         self.fillDimensions(item)
-      
+        self.activeDims= set()
+        self.activeMembers= dict()
+
     def dimItemSelected(self, item, column):
         if item.data(0,0 ).__class__.__name__ == "Dimension":
           if item.childCount() == 0:
             self.fillMembers(item)
-            
+
           if item.isExpanded():
             item.setIcon(0, self.style().standardIcon(QtGui.QStyle.SP_DirClosedIcon))
             item.setExpanded(False)
@@ -85,18 +87,19 @@ class SDMXPluginDialog(QtGui.QDialog, FORM_CLASS):
           if item.isExpanded():
             item.setIcon(0, self.style().standardIcon(QtGui.QStyle.SP_CustomBase))
             item.setExpanded(False)
-            if item.data(0, 0).dim in self.activeMembers.keys():
-              self.activeMembers[item.data(0, 0).dim].remove(item.data(0, 0))
+            if item.data(0, 0).dim.name in self.activeMembers.keys():
+              self.activeMembers[item.data(0, 0).dim.name].remove(item.data(0, 0))
+            QgsMessageLog.logMessage("*** dimItemSelected3 " + item.data(0,0 ).__class__.__name__ + " " + str(len(self.activeMembers[item.data(0, 0).dim.name])), PLUGIN_NAME, QgsMessageLog.INFO)  # XXX
+            if len(self.activeMembers[item.data(0, 0).dim.name]) == 0:
+              del self.activeMembers[item.data(0, 0).dim.name]
           else:
             item.setIcon(0, self.style().standardIcon(QtGui.QStyle.SP_DialogApplyButton))
             item.setExpanded(True)
-            QgsMessageLog.logMessage("*** dimItemSelected2 " + item.data(0, 0).__class__.__name__ + " " + item.data(0, 0).dim.name , PLUGIN_NAME, QgsMessageLog.INFO)  # XXX
+            QgsMessageLog.logMessage("*** dimItemSelected2 " + item.data(0, 0).dim.name + " " + item.data(0, 0).__class__.__name__ + " " + str(self.activeMembers.keys()) , PLUGIN_NAME, QgsMessageLog.INFO)  # XXX
             if item.data(0, 0).dim.name not in self.activeMembers.keys():
               self.activeMembers[item.data(0, 0).dim.name]= set()
             self.activeMembers[item.data(0, 0).dim.name].add(item.data(0, 0))
-              
-#            self.selectMember(item)
-      
+
     def newConnection(self):
         QgsMessageLog.logMessage("*** newConnection ", PLUGIN_NAME, QgsMessageLog.INFO)  # XXX
         SDMXConnectionDialog(self).show()
@@ -145,11 +148,12 @@ class SDMXPluginDialog(QtGui.QDialog, FORM_CLASS):
             exprMembers= list()
             if dim.name in self.activeMembers.keys():
               for m in self.activeMembers[dim.name]:
-                exprMembers.append("'" + m.value + "'")
-                exprDims.append(dim.name + " in (" + ",".join(exprMembers) + ")" )
+                exprMembers.append("'" + m.code + "'")
+              exprDims.append(dim.name + " in (" + ",".join(exprMembers) + ")" )
           cqlExpr= " and ".join(exprDims) 
           QgsMessageLog.logMessage("*** exprShown " + cqlExpr, PLUGIN_NAME, QgsMessageLog.INFO)  # XXX
-          self.wfsExpr.setText(cqlExpr)
+          self.wfsExpr.setText(self.activeWfsConn.getFeatureURL(self.activeCube.featureType, cqlExpr))
+          self.sqlExpr.setText(cqlExpr)
 
     def readSetting(self, propName):
         return self.proj.readEntry(PLUGIN_NAME, propName)[0]
