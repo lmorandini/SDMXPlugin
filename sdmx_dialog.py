@@ -22,11 +22,11 @@
 """
 
 import os, functools
-
 from PyQt4 import QtGui, uic
-from qgis.core import QgsProject , QgsMessageLog
+from qgis.core import QgsProject, QgsMessageLog
 from conn_dialog import SDMXConnectionDialog
-from wfs_conn import WFSConnection
+from cube import Cube, Member, Members, Dimension
+from wfs_connection import WFSConnection
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), 'ui/sdmx_dialog_base.ui'))
@@ -40,21 +40,16 @@ class SDMXPluginDialog(QtGui.QDialog, FORM_CLASS):
         super(SDMXPluginDialog, self).__init__(parent)
         self.setupUi(self)
         # TODO: hard-coded for the time being
-        self.activeWfsConn = WFSConnection("http://130.56.253.19/geoserver/wfs" , "", "", PLUGIN_NAME)
-        # Load connections data, if saved in the project
-        # TODO
-        """
-        for i in range(0, self.cmbConnections.count()):
-          self.cmbServers.itemText(i)
-          
-        self.readSetting("test")
-        """
+        self.activeWfsConn = WFSConnection("", "", "", PLUGIN_NAME)
+        
+        # Load connection data, if saved in the project
+        self.loadSettings()
+        
         self.activeCube= None
         self.activeDims= set()
         self.activeMembers= dict()
         
     def cubeItemSelected(self, item, column):
-        QgsMessageLog.logMessage("*** cubeItemSelected " + item.data(0,0 ).__class__.__name__, PLUGIN_NAME, QgsMessageLog.INFO)  # XXX
         # TODO: all non-selected cubes must have the icon changed
         if item.isExpanded():
           item.setIcon(0, self.style().standardIcon(QtGui.QStyle.SP_FileIcon))
@@ -82,32 +77,28 @@ class SDMXPluginDialog(QtGui.QDialog, FORM_CLASS):
             item.setIcon(0, self.style().standardIcon(QtGui.QStyle.SP_FileDialogStart))
             item.setExpanded(True)
             self.activeDims.add(item.data(0, 0))
-            QgsMessageLog.logMessage("*** dimItemSelected1 " + item.data(0,0 ).__class__.__name__, PLUGIN_NAME, QgsMessageLog.INFO)  # XXX
         else:
           if item.isExpanded():
             item.setIcon(0, self.style().standardIcon(QtGui.QStyle.SP_CustomBase))
             item.setExpanded(False)
             if item.data(0, 0).dim.name in self.activeMembers.keys():
               self.activeMembers[item.data(0, 0).dim.name].remove(item.data(0, 0))
-            QgsMessageLog.logMessage("*** dimItemSelected3 " + item.data(0,0 ).__class__.__name__ + " " + str(len(self.activeMembers[item.data(0, 0).dim.name])), PLUGIN_NAME, QgsMessageLog.INFO)  # XXX
             if len(self.activeMembers[item.data(0, 0).dim.name]) == 0:
               del self.activeMembers[item.data(0, 0).dim.name]
           else:
             item.setIcon(0, self.style().standardIcon(QtGui.QStyle.SP_DialogApplyButton))
             item.setExpanded(True)
-            QgsMessageLog.logMessage("*** dimItemSelected2 " + item.data(0, 0).dim.name + " " + item.data(0, 0).__class__.__name__ + " " + str(self.activeMembers.keys()) , PLUGIN_NAME, QgsMessageLog.INFO)  # XXX
             if item.data(0, 0).dim.name not in self.activeMembers.keys():
               self.activeMembers[item.data(0, 0).dim.name]= set()
             self.activeMembers[item.data(0, 0).dim.name].add(item.data(0, 0))
 
-    def newConnection(self):
-        QgsMessageLog.logMessage("*** newConnection ", PLUGIN_NAME, QgsMessageLog.INFO)  # XXX
-        SDMXConnectionDialog(self).show()
-
     def connect(self):
         self.treeCubes.clear()
+        self.activeWfsConn= WFSConnection(self.wfsUrlInput.text(), 
+           self.usernameInput.text(), self.passwordInput.text(), PLUGIN_NAME)
+
+        self.activeWfsConn.connect()
         for cube in self.activeWfsConn.getCubes():
-          QgsMessageLog.logMessage("*** connect " + str(cube), PLUGIN_NAME, QgsMessageLog.INFO)  # XXX
           item = QtGui.QTreeWidgetItem(self.treeCubes)
           item.setText(1, cube.name)
           item.setData(0, 0, cube)
@@ -115,7 +106,6 @@ class SDMXPluginDialog(QtGui.QDialog, FORM_CLASS):
 
     def fillDimensions(self, cubeItem):
         cube = cubeItem.data(0, 0)
-        QgsMessageLog.logMessage("*** fillDimensions " + cube.__class__.__name__, PLUGIN_NAME, QgsMessageLog.INFO)  # XXX
 
         self.treeDimensions.clear()
         for dim in self.activeWfsConn.getCubeDimensions(cube):
@@ -128,7 +118,6 @@ class SDMXPluginDialog(QtGui.QDialog, FORM_CLASS):
     def fillMembers(self, subTree):
         dim = subTree.data(0, 0)
         for m in self.activeWfsConn.getDimensionMembers(dim).members:
-          QgsMessageLog.logMessage("*** fillMembers " + str(m), PLUGIN_NAME, QgsMessageLog.INFO)  # XXX
           item = QtGui.QTreeWidgetItem(subTree)
           item.setText(1, m.value)
           item.setText(2, m.code)
@@ -137,12 +126,10 @@ class SDMXPluginDialog(QtGui.QDialog, FORM_CLASS):
 
     def selectMember(self, member):
         value = member.data(0, 0)
-        QgsMessageLog.logMessage("*** selectMember " + str(value), PLUGIN_NAME, QgsMessageLog.INFO)  # XXX
 
     def exprShown(self, tabNumber):
         if tabNumber != 2:
           return
-        QgsMessageLog.logMessage("*** exprShown " + str(tabNumber), PLUGIN_NAME, QgsMessageLog.INFO)  # XXX
         if self.activeCube != None:
           exprDims= list()
           for dim in self.activeDims:
@@ -152,12 +139,17 @@ class SDMXPluginDialog(QtGui.QDialog, FORM_CLASS):
                 exprMembers.append("'" + m.code + "'")
               exprDims.append(dim.name + " in (" + ",".join(exprMembers) + ")" )
           cqlExpr= " and ".join(exprDims) 
-          QgsMessageLog.logMessage("*** exprShown " + cqlExpr, PLUGIN_NAME, QgsMessageLog.INFO)  # XXX
           self.wfsExpr.setText(self.activeWfsConn.getFeatureURL(self.activeCube.featureType, cqlExpr))
           self.sqlExpr.setText(cqlExpr)
 
-    def readSetting(self, propName):
-        return self.proj.readEntry(PLUGIN_NAME, propName)[0]
+    def loadSettings(self):
+        self.activeWfsConn.decode(QgsProject.instance().readEntry(PLUGIN_NAME, "connection")[0])
+        self.wfsUrlInput.setText(self.activeWfsConn.url)
+        self.passwordInput.setText(self.activeWfsConn.username)
+        self.passwordInput.setText(self.activeWfsConn.password)
 
-    def writeSetting(self, propName, propValue):
-        self.proj.writeEntry(PLUGIN_NAME, propName, propValue)
+    def saveSettings(self):
+        self.activeWfsConn= WFSConnection(self.wfsUrlInput.text(), 
+           self.usernameInput.text(), self.passwordInput.text(), PLUGIN_NAME)
+        self.connections= QgsProject.instance().writeEntry (PLUGIN_NAME, "connection", 
+           self.activeWfsConn.encode())
