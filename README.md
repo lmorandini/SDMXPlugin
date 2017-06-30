@@ -12,7 +12,7 @@ This plugin allows to:
 ## Manual Installation
 
 From the git repository:
-* Download the code from `https://github.com/lmoran/SDMXPlugin/archive/v0.1.1.zip`
+* Download the code from `https://github.com/lmoran/SDMXPlugin/archive/v0.1.2.zip`
 * Decompress the zip file.
 * Rename decompressed folder to SDMXPlugin
 * Copy the plugin folder to `$HOME/.qgis2/python/plugins/`
