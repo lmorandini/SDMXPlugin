@@ -24,7 +24,6 @@
 import os, functools
 from PyQt4 import QtGui, uic
 from qgis.core import QgsProject, QgsMessageLog
-from conn_dialog import SDMXConnectionDialog
 from cube import Cube, Member, Members, Dimension
 from wfs_connection import WFSConnection
 
