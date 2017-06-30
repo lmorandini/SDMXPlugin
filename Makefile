@@ -69,7 +69,10 @@ RESOURCE_SRC=$(shell grep '^ *<file' resources.qrc | sed 's@</file>@@g;s/.*>//g'
 
 QGISDIR=.qgis2
 
-default: compile
+default: install
+
+install:
+	pip install -r requirements.txt
 
 compile: $(COMPILED_RESOURCE_FILES)
 
