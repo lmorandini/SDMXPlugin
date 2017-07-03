@@ -2,6 +2,8 @@
   Clases used tro hold data baout the SDMX data cube
 """
 
+DIMENSIONS_SUFFIX = "__DIMENSIONS"
+
 """ Cube data holder"""
 class Cube():
     def __init__(self, nsIn="", nameIn="", featureTypeIn=""):
@@ -9,19 +11,19 @@ class Cube():
         self.ns = nsIn
         self.name = nameIn
         self.featureType = featureTypeIn
+        self.dimFeatureType = self.featureType + DIMENSIONS_SUFFIX
 
     def __str__(self):
         return "Cube NS: " + self.ns + " Name: " + self.name + " featureType: " + self.featureType
 
 """ Dimension data holder"""
 class Dimension():
-    def __init__(self, nsIn="", nameIn="", featureTypeIn="", cubeNameIn=""):
+    def __init__(self, nameIn="", descrIn="", cubeNameIn="", featureTypeIn= ""):
         """Constructor."""
-        self.ns = nsIn
         self.name = nameIn
-        self.featureTypeNoNS = featureTypeIn.split(":")[1]
-        self.featureType = featureTypeIn
+        self.description = descrIn
         self.cubeName = cubeNameIn
+        self.featureType = featureTypeIn
 
     def __str__(self):
         return "Dimension NS: " + self.ns + " Name: " + self.name + " featureType: " + self.featureType + " cubeName: " + self.cubeName

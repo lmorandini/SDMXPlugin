@@ -110,7 +110,8 @@ class SDMXPluginDialog(QtGui.QDialog, FORM_CLASS):
         for dim in self.activeWfsConn.getCubeDimensions(cube):
           item = QtGui.QTreeWidgetItem(self.treeDimensions)
           item.setIcon(0, self.style().standardIcon(QtGui.QStyle.SP_DirClosedIcon))
-          item.setText(1, dim.name)
+          item.setText(1, dim.description)
+          item.setText(2, dim.name)
           item.setData(0, 0, dim)
           self.treeDimensions.insertTopLevelItem(0, item)
 

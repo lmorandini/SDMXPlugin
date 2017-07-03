@@ -12,7 +12,7 @@ This plugin allows to:
 ## Manual Installation
 
 From the git repository:
-* Download the code from `https://github.com/lmoran/SDMXPlugin/archive/v0.1.2.zip`
+* Download the code from `https://github.com/lmoran/SDMXPlugin/archive/v0.1.3.zip`
 * Decompress the zip file.
 * Rename decompressed folder to SDMXPlugin
 * Copy the plugin folder to `$HOME/.qgis2/python/plugins/`
@@ -28,7 +28,7 @@ From the git repository:
 ## Use 
 
 * Start QGIS (version 2.0 onwards) if not started already
-* Open the SDMX Plugin (there should be an icon with a power plug on it)
+* Open the SDMX Plugin (there should be an icon with a "SDMX" on it)
 * Insert the URL `http://130.56.253.19/geoserver/wfs` (blank username and password) in the URL field
 * Click "Connect"
 * Select one Cube from the list in the first tab
