@@ -16,7 +16,7 @@ From the git repository:
 * Decompress the zip file.
 * Rename decompressed folder to SDMXPlugin
 * Copy the plugin folder to `$HOME/.qgis2/python/plugins/`
-* Open a terminal window and move to `$HOME/.qgis2/python/plugins/`
+* Open a terminal window and move to `$HOME/.qgis2/python/plugins/SDMXPlugin`
 * Execute `make install`
 * Start QGIS (version 2.0 onwards)
 * Load the SDMX Plugin by checking it on the list of plugins that can be accessed by selecting the 

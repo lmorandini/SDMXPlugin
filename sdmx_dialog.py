@@ -49,15 +49,14 @@ class SDMXPluginDialog(QtGui.QDialog, FORM_CLASS):
         self.activeMembers= dict()
         
     def cubeItemSelected(self, item, column):
-        # TODO: all non-selected cubes must have the icon changed
-        if item.isExpanded():
-          item.setIcon(0, self.style().standardIcon(QtGui.QStyle.SP_FileIcon))
-          item.setExpanded(False)
-          self.activeCube= None 
-        else:
-          item.setIcon(0, self.style().standardIcon(QtGui.QStyle.SP_DialogApplyButton))
-          item.setExpanded(True)
-          self.activeCube=item.data(0, 0) 
+        for i in range(self.treeCubes.invisibleRootItem().childCount()):
+          itemI = self.treeCubes.invisibleRootItem().child(i)
+          itemI.setIcon(0, self.style().standardIcon(QtGui.QStyle.SP_CustomBase))
+          itemI.setExpanded(False)
+          
+        item.setIcon(0, self.style().standardIcon(QtGui.QStyle.SP_DialogApplyButton))
+        item.setExpanded(True)
+        self.activeCube=item.data(0, 0) 
 
         self.fillDimensions(item)
         self.activeDims= set()
