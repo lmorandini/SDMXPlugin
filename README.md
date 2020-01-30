@@ -18,7 +18,7 @@ From the git repository:
 * Copy the plugin folder to `$HOME/.qgis2/python/plugins/`
 * Open a terminal window and move to `$HOME/.qgis2/python/plugins/SDMXPlugin`
 * Execute `make install`
-* Start QGIS (version 2.0 onwards)
+* Start QGIS (version 3.0 onwards)
 * Load the SDMX Plugin by checking it on the list of plugins that can be accessed by selecting the 
   "Plugins / Manage and install plugins..." nenu item
 * Close the plugin dialog 
@@ -27,7 +27,7 @@ From the git repository:
 
 ## Use 
 
-* Start QGIS (version 2.0 onwards) if not started already
+* Start QGIS (version 3.0 onwards) if not started already
 * Open the SDMX Plugin (there should be an icon with a "SDMX" on it)
 * Insert the URL `http://130.56.253.19/geoserver/wfs` (blank username and password) in the URL field
 * Click "Connect"

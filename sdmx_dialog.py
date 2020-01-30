@@ -20,18 +20,22 @@
  *                                                                         *
  ***************************************************************************/
 """
+from __future__ import absolute_import
 
+from builtins import range
 import os, functools
-from PyQt4 import QtGui, uic
-from qgis.core import QgsProject, QgsMessageLog
-from cube import Cube, Member, Members, Dimension
-from wfs_connection import WFSConnection
+
+from qgis.PyQt.QtWidgets import QDialog
+from qgis.PyQt import uic
+from qgis.core import QgsProject, QgsMessageLog, QgsStyle
+from .cube import Cube, Member, Members, Dimension
+from .wfs_connection import WFSConnection
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), 'ui/sdmx_dialog_base.ui'))
 PLUGIN_NAME = "SDMXPlugin"
 
-class SDMXPluginDialog(QtGui.QDialog, FORM_CLASS):
+class SDMXPluginDialog(QDialog, FORM_CLASS):
 
     def __init__(self, parent=None):
         """Constructor."""
@@ -51,10 +55,10 @@ class SDMXPluginDialog(QtGui.QDialog, FORM_CLASS):
     def cubeItemSelected(self, item, column):
         for i in range(self.treeCubes.invisibleRootItem().childCount()):
           itemI = self.treeCubes.invisibleRootItem().child(i)
-          itemI.setIcon(0, self.style().standardIcon(QtGui.QStyle.SP_CustomBase))
+          itemI.setIcon(0, self.style().standardIcon(QgsStyle.SP_CustomBase))
           itemI.setExpanded(False)
           
-        item.setIcon(0, self.style().standardIcon(QtGui.QStyle.SP_DialogApplyButton))
+        item.setIcon(0, self.style().standardIcon(QgsStyle.SP_DialogApplyButton))
         item.setExpanded(True)
         self.activeCube=item.data(0, 0) 
 
@@ -68,25 +72,25 @@ class SDMXPluginDialog(QtGui.QDialog, FORM_CLASS):
             self.fillMembers(item)
 
           if item.isExpanded():
-            item.setIcon(0, self.style().standardIcon(QtGui.QStyle.SP_DirClosedIcon))
+            item.setIcon(0, self.style().standardIcon(QgsStyle.SP_DirClosedIcon))
             item.setExpanded(False)
             self.activeDims.remove(item.data(0, 0))
           else:
-            item.setIcon(0, self.style().standardIcon(QtGui.QStyle.SP_FileDialogStart))
+            item.setIcon(0, self.style().standardIcon(QgsStyle.SP_FileDialogStart))
             item.setExpanded(True)
             self.activeDims.add(item.data(0, 0))
         else:
           if item.isExpanded():
-            item.setIcon(0, self.style().standardIcon(QtGui.QStyle.SP_CustomBase))
+            item.setIcon(0, self.style().standardIcon(QgsStyle.SP_CustomBase))
             item.setExpanded(False)
-            if item.data(0, 0).dim.name in self.activeMembers.keys():
+            if item.data(0, 0).dim.name in list(self.activeMembers.keys()):
               self.activeMembers[item.data(0, 0).dim.name].remove(item.data(0, 0))
             if len(self.activeMembers[item.data(0, 0).dim.name]) == 0:
               del self.activeMembers[item.data(0, 0).dim.name]
           else:
-            item.setIcon(0, self.style().standardIcon(QtGui.QStyle.SP_DialogApplyButton))
+            item.setIcon(0, self.style().standardIcon(QgsStyle.SP_DialogApplyButton))
             item.setExpanded(True)
-            if item.data(0, 0).dim.name not in self.activeMembers.keys():
+            if item.data(0, 0).dim.name not in list(self.activeMembers.keys()):
               self.activeMembers[item.data(0, 0).dim.name]= set()
             self.activeMembers[item.data(0, 0).dim.name].add(item.data(0, 0))
 
@@ -108,7 +112,7 @@ class SDMXPluginDialog(QtGui.QDialog, FORM_CLASS):
         self.treeDimensions.clear()
         for dim in self.activeWfsConn.getCubeDimensions(cube):
           item = QtGui.QTreeWidgetItem(self.treeDimensions)
-          item.setIcon(0, self.style().standardIcon(QtGui.QStyle.SP_DirClosedIcon))
+          item.setIcon(0, self.style().standardIcon(QgsStyle.SP_DirClosedIcon))
           item.setText(1, dim.description)
           item.setText(2, dim.name)
           item.setData(0, 0, dim)
@@ -133,7 +137,7 @@ class SDMXPluginDialog(QtGui.QDialog, FORM_CLASS):
           exprDims= list()
           for dim in self.activeDims:
             exprMembers= list()
-            if dim.name in self.activeMembers.keys():
+            if dim.name in list(self.activeMembers.keys()):
               for m in self.activeMembers[dim.name]:
                 exprMembers.append("'" + m.code + "'")
               exprDims.append(dim.name + " in (" + ",".join(exprMembers) + ")" )
