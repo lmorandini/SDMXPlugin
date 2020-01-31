@@ -20,18 +20,23 @@
  *                                                                         *
  ***************************************************************************/
 """
+from __future__ import absolute_import
 
-import os, functools
-from PyQt4 import QtGui, uic
-from qgis.core import QgsProject, QgsMessageLog
-from cube import Cube, Member, Members, Dimension
-from wfs_connection import WFSConnection
+from builtins import range
+import os, functools, requests, tempfile
+from urllib.parse import unquote
+
+from qgis.PyQt.QtWidgets import QDialog, QTreeWidgetItem, QStyle
+from qgis.PyQt import uic
+from qgis.core import QgsProject, QgsMessageLog, QgsVectorLayer
+from .cube import Cube, Member, Members, Dimension
+from .wfs_connection import WFSConnection
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), 'ui/sdmx_dialog_base.ui'))
 PLUGIN_NAME = "SDMXPlugin"
 
-class SDMXPluginDialog(QtGui.QDialog, FORM_CLASS):
+class SDMXPluginDialog(QDialog, FORM_CLASS):
 
     def __init__(self, parent=None):
         """Constructor."""
@@ -51,10 +56,10 @@ class SDMXPluginDialog(QtGui.QDialog, FORM_CLASS):
     def cubeItemSelected(self, item, column):
         for i in range(self.treeCubes.invisibleRootItem().childCount()):
           itemI = self.treeCubes.invisibleRootItem().child(i)
-          itemI.setIcon(0, self.style().standardIcon(QtGui.QStyle.SP_CustomBase))
+          itemI.setIcon(0, self.style().standardIcon(QStyle.SP_ArrowDown))
           itemI.setExpanded(False)
           
-        item.setIcon(0, self.style().standardIcon(QtGui.QStyle.SP_DialogApplyButton))
+        item.setIcon(0, self.style().standardIcon(QStyle.SP_DialogApplyButton))
         item.setExpanded(True)
         self.activeCube=item.data(0, 0) 
 
@@ -68,25 +73,25 @@ class SDMXPluginDialog(QtGui.QDialog, FORM_CLASS):
             self.fillMembers(item)
 
           if item.isExpanded():
-            item.setIcon(0, self.style().standardIcon(QtGui.QStyle.SP_DirClosedIcon))
+            item.setIcon(0, self.style().standardIcon(QStyle.SP_ArrowDown))
             item.setExpanded(False)
             self.activeDims.remove(item.data(0, 0))
           else:
-            item.setIcon(0, self.style().standardIcon(QtGui.QStyle.SP_FileDialogStart))
+            item.setIcon(0, self.style().standardIcon(QStyle.SP_ArrowUp))
             item.setExpanded(True)
             self.activeDims.add(item.data(0, 0))
         else:
           if item.isExpanded():
-            item.setIcon(0, self.style().standardIcon(QtGui.QStyle.SP_CustomBase))
+            item.setIcon(0, self.style().standardIcon(QStyle.SP_CustomBase))
             item.setExpanded(False)
-            if item.data(0, 0).dim.name in self.activeMembers.keys():
+            if item.data(0, 0).dim.name in list(self.activeMembers.keys()):
               self.activeMembers[item.data(0, 0).dim.name].remove(item.data(0, 0))
             if len(self.activeMembers[item.data(0, 0).dim.name]) == 0:
               del self.activeMembers[item.data(0, 0).dim.name]
           else:
-            item.setIcon(0, self.style().standardIcon(QtGui.QStyle.SP_DialogApplyButton))
+            item.setIcon(0, self.style().standardIcon(QStyle.SP_DialogApplyButton))
             item.setExpanded(True)
-            if item.data(0, 0).dim.name not in self.activeMembers.keys():
+            if item.data(0, 0).dim.name not in list(self.activeMembers.keys()):
               self.activeMembers[item.data(0, 0).dim.name]= set()
             self.activeMembers[item.data(0, 0).dim.name].add(item.data(0, 0))
 
@@ -97,7 +102,7 @@ class SDMXPluginDialog(QtGui.QDialog, FORM_CLASS):
 
         self.activeWfsConn.connect()
         for cube in self.activeWfsConn.getCubes():
-          item = QtGui.QTreeWidgetItem(self.treeCubes)
+          item = QTreeWidgetItem(self.treeCubes)
           item.setText(1, cube.name)
           item.setData(0, 0, cube)
           self.treeCubes.insertTopLevelItem(0, item)
@@ -107,8 +112,8 @@ class SDMXPluginDialog(QtGui.QDialog, FORM_CLASS):
 
         self.treeDimensions.clear()
         for dim in self.activeWfsConn.getCubeDimensions(cube):
-          item = QtGui.QTreeWidgetItem(self.treeDimensions)
-          item.setIcon(0, self.style().standardIcon(QtGui.QStyle.SP_DirClosedIcon))
+          item = QTreeWidgetItem(self.treeDimensions)
+          item.setIcon(0, self.style().standardIcon(QStyle.SP_ArrowDown))
           item.setText(1, dim.description)
           item.setText(2, dim.name)
           item.setData(0, 0, dim)
@@ -117,7 +122,7 @@ class SDMXPluginDialog(QtGui.QDialog, FORM_CLASS):
     def fillMembers(self, subTree):
         dim = subTree.data(0, 0)
         for m in self.activeWfsConn.getDimensionMembers(dim).members:
-          item = QtGui.QTreeWidgetItem(subTree)
+          item = QTreeWidgetItem(subTree)
           item.setText(1, m.value)
           item.setText(2, m.code)
           item.setData(0, 0, m)
@@ -133,20 +138,33 @@ class SDMXPluginDialog(QtGui.QDialog, FORM_CLASS):
           exprDims= list()
           for dim in self.activeDims:
             exprMembers= list()
-            if dim.name in self.activeMembers.keys():
+            if dim.name in list(self.activeMembers.keys()):
               for m in self.activeMembers[dim.name]:
                 exprMembers.append("'" + m.code + "'")
               exprDims.append(dim.name + " in (" + ",".join(exprMembers) + ")" )
           cqlExpr= " and ".join(exprDims) 
-          self.wfsExpr.setText(self.activeWfsConn.getFeatureURL(self.activeCube.featureType, cqlExpr))
+          self.wfsExpr.setText(unquote(self.activeWfsConn.getFeatureURL(self.activeCube.featureType, cqlExpr)))
           self.sqlExpr.setText(cqlExpr)
 
+    def executeWFSRequest(self):
+        msg = "About to ecxcute WFS request %s" % self.wfsExpr.toPlainText()
+        QgsMessageLog.logMessage(msg, 'Info')
+        response = requests.get(self.wfsExpr.toPlainText())
+        response.raise_for_status()
+        tmpCsv= tempfile.NamedTemporaryFile(mode = 'w', suffix = '.csv', prefix = 'sdmx-', delete=False)
+        tmpCsv.write(response.text)
+        tmpCsv.close()
+        table = QgsVectorLayer('file://' + tmpCsv.name, 'SDMX:: ' + self.sqlExpr.toPlainText(), 'delimitedtext')
+        QgsProject.instance().addMapLayer(table)
+
+    # FIXME: this would be handy to load the WFS URL from QGIS settings, excepts it does not work in QGSI3
     def loadSettings(self):
         self.activeWfsConn.decode(QgsProject.instance().readEntry(PLUGIN_NAME, "connection")[0])
         self.wfsUrlInput.setText(self.activeWfsConn.url)
         self.passwordInput.setText(self.activeWfsConn.username)
         self.passwordInput.setText(self.activeWfsConn.password)
 
+    # FIXME: this would be handy to save the current WFS URL to QGIS settings, excepts it does not work in QGSI3
     def saveSettings(self):
         self.activeWfsConn= WFSConnection(self.wfsUrlInput.text(), 
            self.usernameInput.text(), self.passwordInput.text(), PLUGIN_NAME)
