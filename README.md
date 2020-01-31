@@ -22,16 +22,19 @@ From the git repository:
 * Load the SDMX Plugin by checking it on the list of plugins that can be accessed by selecting the 
   "Plugins / Manage and install plugins..." nenu item
 * Close the plugin dialog 
-* Close QGIS 
 
 
 ## Use 
 
 * Start QGIS (version 3.0 onwards) if not started already
-* Open the SDMX Plugin (there should be an icon with a "SDMX" on it)
-* Insert the URL `http://130.56.253.19/geoserver/wfs` (blank username and password) in the URL field
+* Open the SDMX Plugin (there should be an icon with "SDMX" on it)
+* Insert the WFS URL of a GeoServer instance serving SDMX layers (such as `http://<hostname>/geoserver/wfs`) in the URL field
+* Add username and password as required
 * Click "Connect"
-* Select one Cube from the list in the first tab
-* Switch to the second tab and select one or more member from each dimension
-* Switch to the third tab and copy the WFS expression (to use it, paste it in the address bar of a browser)
-* Optionally, clieck `Save` on the first tab to save the connection parameters to the project file, and save the project
+* Select one Cube from the list 
+* Switch to the "Dimensions" tab and select one or more member from each dimension
+* Switch to the "Expressions" tab
+* Click on "Execute" button 
+* The plugin should now execute an WFS query and add a geometry-less layer to the list of layers in QGIS
+* Provided the query was executed correctly, a right-click, "Open Attribute Table" of the just-added layer shouls show the query response
+
