@@ -2,7 +2,7 @@ from __future__ import absolute_import
 from builtins import str
 from builtins import object
 import requests, lxml, re, base64
-from qgis.core import QgsMessageLog
+from qgis.core import Qgis, QgsMessageLog
 from qgis.gui import QgsMessageBar
 from qgis.utils import iface
 from libpasteurize.fixes import feature_base
@@ -34,7 +34,7 @@ class WFSConnection(object):
 
     def encode(self):
       """Encode the connection parameters into a single String and returns it"""
-      return base64.b64encode(CONNECTION_SEP.join((self.url, self.username, self.password)))
+      return base64.b64encode(CONNECTION_SEP.join(self.url, self.username, self.password).encode('utf-8').decode('utf-8'))
 
     def decode(self, connString):
       """Decode the connection parameters from a string and update the connection with them"""
@@ -47,11 +47,11 @@ class WFSConnection(object):
     def connect(self):
         try:
           resp = requests.get(self.url, auth=self.auth,
-                            params={"request":"GetCapabilities", "version":"1.0.0", "service":"wfs"})
+                            params={"request":"GetCapabilities", "version":"1.1.0", "service":"wfs"})
         except requests.exceptions.RequestException as e:
           msg= "Error connecting to WFS server %s" % str(e)
-          QgsMessageLog.logMessage(msg, self.loggerName, QgsMessageLog.CRITICAL)
-          iface.messageBar().pushMessage("Error", msg, level=QgsMessageBar.CRITICAL)
+          QgsMessageLog.logMessage(msg, self.loggerName, Qgis.Critical)
+          iface.messageBar().pushMessage("Error", msg, level=Qgis.Critical)
           return
 
         try:
@@ -60,8 +60,8 @@ class WFSConnection(object):
                 ".//{http://www.opengis.net/wfs}FeatureType/{http://www.opengis.net/wfs}Name")
         except lxml.etree.XMLSyntaxError as e:
           msg= "Error retrieving metadata from WFS server %s, please check URL and authentication" % str(e)
-          QgsMessageLog.logMessage(msg, self.loggerName, QgsMessageLog.CRITICAL)
-          iface.messageBar().pushMessage("Error", msg, level=QgsMessageBar.CRITICAL)
+          QgsMessageLog.logMessage(msg, self.loggerName, Qgis.Critical)
+          iface.messageBar().pushMessage("Error", msg, level=Qgis.Critical)
           return
 
         # Extracts cube feature types
@@ -75,8 +75,8 @@ class WFSConnection(object):
                         "typeName":cube.dimFeatureType, "cql_filter":"CODE='ALL'"})
           except requests.exceptions.RequestException as e:
             msg= "Error connecting to WFS server %s" % str(e)
-            QgsMessageLog.logMessage(msg, self.loggerName, QgsMessageLog.CRITICAL)
-            iface.messageBar().pushMessage("Error", msg, level=QgsMessageBar.CRITICAL)
+            QgsMessageLog.logMessage(msg, self.loggerName, Qgis.Critical)
+            iface.messageBar().pushMessage("Error", msg, level=Qgis.Critical)
             return
             
           try:
@@ -84,14 +84,14 @@ class WFSConnection(object):
 
           except lxml.etree.XMLSyntaxError as e:
             msg= "Error retrieving metadata from WFS server %s, please check URL and authentication" % str(e)
-            QgsMessageLog.logMessage(msg, self.loggerName, QgsMessageLog.CRITICAL)
-            iface.messageBar().pushMessage("Error", msg, level=QgsMessageBar.CRITICAL)
+            QgsMessageLog.logMessage(msg, self.loggerName, Qgis.Critical)
+            iface.messageBar().pushMessage("Error", msg, level=Qgis.Critical)
             return
 
           if features is None:
             msg="No feature types were returned"
-            QgsMessageLog.logMessage(msg, self.loggerName, QgsMessageLog.CRITICAL)
-            iface.messageBar().pushMessage("Error", msg, level=QgsMessageBar.CRITICAL)
+            QgsMessageLog.logMessage(msg, self.loggerName, Qgis.Critical)
+            iface.messageBar().pushMessage("Error", msg, level=Qgis.Critical)
             return
 
           self.dimensions[cube.featureType]= [Dimension(feat[0].text, feat[1].text, cube.name, cube.dimFeatureType) for feat in features]
@@ -119,8 +119,8 @@ class WFSConnection(object):
                         "typeName":dim.featureType, "cql_filter":"CODE='" + dim.name + "'"})
         except requests.exceptions.RequestException as e:
           msg= "Error connecting to WFS server %s" % str(e)
-          QgsMessageLog.logMessage(msg, self.loggerName, QgsMessageLog.CRITICAL)
-          iface.messageBar().pushMessage("Error", msg, level=QgsMessageBar.CRITICAL)
+          QgsMessageLog.logMessage(msg, self.loggerName, Qgis.Critical)
+          iface.messageBar().pushMessage("Error", msg, level=Qgis.Critical)
           return
             
         try:
@@ -128,8 +128,8 @@ class WFSConnection(object):
 
         except lxml.etree.XMLSyntaxError as e:
           msg= "Error retrieving metadata from WFS server %s, please check URL and authentication" % str(e)
-          QgsMessageLog.logMessage(msg, self.loggerName, QgsMessageLog.CRITICAL)
-          iface.messageBar().pushMessage("Error", msg, level=QgsMessageBar.CRITICAL)
+          QgsMessageLog.logMessage(msg, self.loggerName, Qgis.Critical)
+          iface.messageBar().pushMessage("Error", msg, level=Qgis.Critical)
           return
         
         m = Members(dim)

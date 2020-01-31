@@ -25,9 +25,9 @@ from __future__ import absolute_import
 from builtins import range
 import os, functools
 
-from qgis.PyQt.QtWidgets import QDialog
+from qgis.PyQt.QtWidgets import QDialog, QTreeWidgetItem, QStyle
 from qgis.PyQt import uic
-from qgis.core import QgsProject, QgsMessageLog, QgsStyle
+from qgis.core import QgsProject, QgsMessageLog
 from .cube import Cube, Member, Members, Dimension
 from .wfs_connection import WFSConnection
 
@@ -55,10 +55,10 @@ class SDMXPluginDialog(QDialog, FORM_CLASS):
     def cubeItemSelected(self, item, column):
         for i in range(self.treeCubes.invisibleRootItem().childCount()):
           itemI = self.treeCubes.invisibleRootItem().child(i)
-          itemI.setIcon(0, self.style().standardIcon(QgsStyle.SP_CustomBase))
+          itemI.setIcon(0, self.style().standardIcon(QStyle.SP_ArrowDown))
           itemI.setExpanded(False)
           
-        item.setIcon(0, self.style().standardIcon(QgsStyle.SP_DialogApplyButton))
+        item.setIcon(0, self.style().standardIcon(QStyle.SP_DialogApplyButton))
         item.setExpanded(True)
         self.activeCube=item.data(0, 0) 
 
@@ -72,23 +72,23 @@ class SDMXPluginDialog(QDialog, FORM_CLASS):
             self.fillMembers(item)
 
           if item.isExpanded():
-            item.setIcon(0, self.style().standardIcon(QgsStyle.SP_DirClosedIcon))
+            item.setIcon(0, self.style().standardIcon(QStyle.SP_ArrowDown))
             item.setExpanded(False)
             self.activeDims.remove(item.data(0, 0))
           else:
-            item.setIcon(0, self.style().standardIcon(QgsStyle.SP_FileDialogStart))
+            item.setIcon(0, self.style().standardIcon(QStyle.SP_ArrowUp))
             item.setExpanded(True)
             self.activeDims.add(item.data(0, 0))
         else:
           if item.isExpanded():
-            item.setIcon(0, self.style().standardIcon(QgsStyle.SP_CustomBase))
+            item.setIcon(0, self.style().standardIcon(QStyle.SP_CustomBase))
             item.setExpanded(False)
             if item.data(0, 0).dim.name in list(self.activeMembers.keys()):
               self.activeMembers[item.data(0, 0).dim.name].remove(item.data(0, 0))
             if len(self.activeMembers[item.data(0, 0).dim.name]) == 0:
               del self.activeMembers[item.data(0, 0).dim.name]
           else:
-            item.setIcon(0, self.style().standardIcon(QgsStyle.SP_DialogApplyButton))
+            item.setIcon(0, self.style().standardIcon(QStyle.SP_DialogApplyButton))
             item.setExpanded(True)
             if item.data(0, 0).dim.name not in list(self.activeMembers.keys()):
               self.activeMembers[item.data(0, 0).dim.name]= set()
@@ -101,7 +101,7 @@ class SDMXPluginDialog(QDialog, FORM_CLASS):
 
         self.activeWfsConn.connect()
         for cube in self.activeWfsConn.getCubes():
-          item = QtGui.QTreeWidgetItem(self.treeCubes)
+          item = QTreeWidgetItem(self.treeCubes)
           item.setText(1, cube.name)
           item.setData(0, 0, cube)
           self.treeCubes.insertTopLevelItem(0, item)
@@ -111,8 +111,8 @@ class SDMXPluginDialog(QDialog, FORM_CLASS):
 
         self.treeDimensions.clear()
         for dim in self.activeWfsConn.getCubeDimensions(cube):
-          item = QtGui.QTreeWidgetItem(self.treeDimensions)
-          item.setIcon(0, self.style().standardIcon(QgsStyle.SP_DirClosedIcon))
+          item = QTreeWidgetItem(self.treeDimensions)
+          item.setIcon(0, self.style().standardIcon(QStyle.SP_ArrowDown))
           item.setText(1, dim.description)
           item.setText(2, dim.name)
           item.setData(0, 0, dim)
@@ -121,7 +121,7 @@ class SDMXPluginDialog(QDialog, FORM_CLASS):
     def fillMembers(self, subTree):
         dim = subTree.data(0, 0)
         for m in self.activeWfsConn.getDimensionMembers(dim).members:
-          item = QtGui.QTreeWidgetItem(subTree)
+          item = QTreeWidgetItem(subTree)
           item.setText(1, m.value)
           item.setText(2, m.code)
           item.setData(0, 0, m)
