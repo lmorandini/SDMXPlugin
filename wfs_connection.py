@@ -34,7 +34,7 @@ class WFSConnection(object):
 
     def encode(self):
       """Encode the connection parameters into a single String and returns it"""
-      return base64.b64encode(CONNECTION_SEP.join(self.url, self.username, self.password).encode('utf-8').decode('utf-8'))
+      return base64.b64encode(CONNECTION_SEP.join((self.url, self.username, self.password)).encode('utf-8')).decode('utf-8')
 
     def decode(self, connString):
       """Decode the connection parameters from a string and update the connection with them"""

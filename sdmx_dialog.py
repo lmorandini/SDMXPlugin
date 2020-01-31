@@ -23,11 +23,12 @@
 from __future__ import absolute_import
 
 from builtins import range
-import os, functools
+import os, functools, requests, tempfile
+from urllib.parse import unquote
 
 from qgis.PyQt.QtWidgets import QDialog, QTreeWidgetItem, QStyle
 from qgis.PyQt import uic
-from qgis.core import QgsProject, QgsMessageLog
+from qgis.core import QgsProject, QgsMessageLog, QgsVectorLayer
 from .cube import Cube, Member, Members, Dimension
 from .wfs_connection import WFSConnection
 
@@ -142,15 +143,28 @@ class SDMXPluginDialog(QDialog, FORM_CLASS):
                 exprMembers.append("'" + m.code + "'")
               exprDims.append(dim.name + " in (" + ",".join(exprMembers) + ")" )
           cqlExpr= " and ".join(exprDims) 
-          self.wfsExpr.setText(self.activeWfsConn.getFeatureURL(self.activeCube.featureType, cqlExpr))
+          self.wfsExpr.setText(unquote(self.activeWfsConn.getFeatureURL(self.activeCube.featureType, cqlExpr)))
           self.sqlExpr.setText(cqlExpr)
 
+    def executeWFSRequest(self):
+        msg = "About to ecxcute WFS request %s" % self.wfsExpr.toPlainText()
+        QgsMessageLog.logMessage(msg, 'Info')
+        response = requests.get(self.wfsExpr.toPlainText())
+        response.raise_for_status()
+        tmpCsv= tempfile.NamedTemporaryFile(mode = 'w', suffix = '.csv', prefix = 'sdmx-', delete=False)
+        tmpCsv.write(response.text)
+        tmpCsv.close()
+        table = QgsVectorLayer('file://' + tmpCsv.name, 'SDMX ' + self.sqlExpr.toPlainText(), 'delimitedtext')
+        QgsProject.instance().addMapLayer(table)
+
+    # FIXME: this would be handy to load the WFS URL from QGIS settings, excepts it does not work in QGSI3
     def loadSettings(self):
         self.activeWfsConn.decode(QgsProject.instance().readEntry(PLUGIN_NAME, "connection")[0])
         self.wfsUrlInput.setText(self.activeWfsConn.url)
         self.passwordInput.setText(self.activeWfsConn.username)
         self.passwordInput.setText(self.activeWfsConn.password)
 
+    # FIXME: this would be handy to save the current WFS URL to QGIS settings, excepts it does not work in QGSI3
     def saveSettings(self):
         self.activeWfsConn= WFSConnection(self.wfsUrlInput.text(), 
            self.usernameInput.text(), self.passwordInput.text(), PLUGIN_NAME)
