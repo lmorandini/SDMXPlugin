@@ -149,7 +149,7 @@ class SDMXPluginDialog(QDialog, FORM_CLASS):
     def executeWFSRequest(self):
         msg = "About to ecxcute WFS request %s" % self.wfsExpr.toPlainText()
         QgsMessageLog.logMessage(msg, 'Info')
-        response = requests.get(self.wfsExpr.toPlainText())
+        response = requests.get(self.wfsExpr.toPlainText(), auth=self.activeWfsConn.auth)
         response.raise_for_status()
         tmpCsv= tempfile.NamedTemporaryFile(mode = 'w', suffix = '.csv', prefix = 'sdmx-', delete=False)
         tmpCsv.write(response.text)
