@@ -10,7 +10,7 @@
 name=SDMXPlugin
 qgisMinimumVersion=3.0
 description=Plugin to query SDMX data cubes as WFS feature types
-version=3.0.2
+version=3.1.0
 author=Luca Morandini - The AURIN Project
 email=luca.morandini@unimelb.edu.au
 

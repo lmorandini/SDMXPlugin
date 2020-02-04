@@ -1,217 +1,189 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
-  <class>SDMXPluginDialog</class>
-  <widget class="QDialog" name="SDMXDialog">
-    <property name="geometry">
-      <rect>
-        <x>0</x>
-        <y>0</y>
-        <width>500</width>
-        <height>600</height>
-      </rect>
-    </property>
-    <property name="sizePolicy">
-      <sizepolicy hsizetype="Expanding" vsizetype="Maximum">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-      </sizepolicy>
-    </property>
-    <property name="windowTitle">
-      <string>SDMX Query</string>
-    </property>
-
-    <layout class="QVBoxLayout" name="verticalLayout">
-      <item>
-
-        <widget class="QTabWidget" name="tabWidget">
-          <property name="currentIndex">
-            <number>0</number>
-          </property>
-
-          <widget class="QWidget" name="tabConnections">
-            <attribute name="title">
-              <string>Servers</string>
-            </attribute>
-            <layout class="QGridLayout" name="gridLayout">
-              <item row="0" column="0">
-                <widget class="QLabel" name="label">
-                  <property name="text">
-                    <string>WFS URL</string>
-                  </property>
-                </widget>
-              </item>
-              <item row="0" column="1" colspan="3">
-                <widget class="QLineEdit" name="wfsUrlInput" />
-              </item>
-              <item row="1" column="0">
-                <widget class="QLabel" name="usernameLabel">
-                  <property name="text">
-                    <string>Username</string>
-                  </property>
-                </widget>
-              </item>
-              <item row="1" column="1">
-                <widget class="QLineEdit" name="usernameInput" />
-              </item>
-              <item row="2" column="0">
-                <widget class="QLabel" name="passwordLabel">
-                  <property name="text">
-                    <string>Password</string>
-                  </property>
-                </widget>
-              </item>
-              <item row="2" column="1">
-                <widget class="QLineEdit" name="passwordInput">
-                  <property name="echoMode">
-                    <enum>QLineEdit::Password</enum>
-                  </property>
-                </widget>
-              </item>
-              <item row="1" column="2">
-                <widget class="QPushButton" name="btnConnect">
-                  <property name="text">
-                    <string>Connect</string>
-                  </property>
-                </widget>
-              </item>
-              <item row="4" column="0" colspan="3">
-                <widget class="QTreeWidget" name="treeCubes">
-                  <property name="toolTip">
-                    <string>Click to select the cube</string>
-                  </property>
-                  <property name="editTriggers">
-                    <set>QAbstractItemView::NoEditTriggers</set>
-                  </property>
-                  <property name="alternatingRowColors">
-                    <bool>true</bool>
-                  </property>
-                  <property name="rootIsDecorated">
-                    <bool>false</bool>
-                  </property>
-                  <property name="itemsExpandable">
-                    <bool>false</bool>
-                  </property>
-                  <property name="sortingEnabled">
-                    <bool>False</bool>
-                  </property>
-                  <property name="allColumnsShowFocus">
-                    <bool>true</bool>
-                  </property>
-                  <attribute name="headerStretchLastSection">
-                    <bool>true</bool>
-                  </attribute>
-                  <column>
-                    <property name="text">
-                      <string>State</string>
-                    </property>
-                  </column>
-                  <column>
-                    <property name="text">
-                      <string>Cube name</string>
-                    </property>
-                  </column>
-                </widget>
-              </item>
-            </layout>
-          </widget>
-
-          <widget class="QWidget" name="tabDimensions">
-            <attribute name="title">
-              <string>Dimensions</string>
-            </attribute>
-            <layout class="QGridLayout" name="gridLayout">
-              <item row="2" column="0" colspan="3">
-                <widget class="QTreeWidget" name="treeDimensions">
-                  <property name="toolTip">
-                    <string>Click to select the member</string>
-                  </property>
-                  <property name="editTriggers">
-                    <set>QAbstractItemView::NoEditTriggers</set>
-                  </property>
-                  <property name="alternatingRowColors">
-                    <bool>true</bool>
-                  </property>
-                  <property name="rootIsDecorated">
-                    <bool>false</bool>
-                  </property>
-                  <property name="itemsExpandable">
-                    <bool>true</bool>
-                  </property>
-                  <property name="sortingEnabled">
-                    <bool>True</bool>
-                  </property>
-                  <property name="allColumnsShowFocus">
-                    <bool>true</bool>
-                  </property>
-                  <attribute name="headerStretchLastSection">
-                    <bool>false</bool>
-                  </attribute>
-                  <column>
-                    <property name="text">
-                      <string>
-                      </string>
-                    </property>
-                  </column>
-                  <column>
-                    <property name="text">
-                      <string>Member</string>
-                    </property>
-                  </column>
-                  <column>
-                    <property name="text">
-                      <string>Code</string>
-                    </property>
-                  </column>
-                </widget>
-              </item>
-            </layout>
-          </widget>
-
-          <widget class="QWidget" name="tabExpressions">
-            <attribute name="title">
-              <string>Expressions</string>
-            </attribute>
-            <layout class="QGridLayout" name="gridLayout">
-              <item row="1" column="1" colSpan="1">
-                <widget class="QLabel" name="label_2">
-                  <property name="text">
-                    <string>WFS</string>
-                  </property>
-                </widget>
-              </item>
-              <item row="1" column="2" colSpan="3">
-                <widget class="QTextEdit" name="wfsExpr"
-                  readOnly="true" />
-              </item>
-              <item row="2" column="2" colSpan="3">
-                <widget class="QPushButton" name="btnExecute">
-                  <property name="text">
-                    <string>Execute</string>
-                  </property>
-                </widget>
-              </item>
-              <item row="3" column="1" colSpan="1">
-                <widget class="QLabel" name="label_3">
-                  <property name="text">
-                    <string>SQL-like</string>
-                  </property>
-                </widget>
-              </item>
-              <item row="3" column="2" colSpan="3">
-                <widget class="QTextEdit" name="sqlExpr"
-                  readOnly="true" />
-              </item>
-            </layout>
-          </widget>
+ <class>SDMXPluginDialog</class>
+ <widget class="QDialog" name="SDMXDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>498</width>
+    <height>598</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Expanding" vsizetype="Maximum">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="windowTitle">
+   <string>SDMX Query</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QTabWidget" name="tabWidget">
+     <property name="currentIndex">
+      <number>0</number>
+     </property>
+     <widget class="QWidget" name="tabConnections">
+      <attribute name="title">
+       <string>Server</string>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayout">
+       <item row="0" column="0">
+        <widget class="QLabel" name="label">
+         <property name="text">
+          <string>WFS URL</string>
+         </property>
         </widget>
-
-      </item>
-    </layout>
-  </widget>
-
-  <resources />
-
-  <connections>
+       </item>
+       <item row="0" column="1" colspan="3">
+        <widget class="QLineEdit" name="wfsUrlInput"/>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="usernameLabel">
+         <property name="text">
+          <string>Username</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QLineEdit" name="usernameInput"/>
+       </item>
+       <item row="2" column="0">
+        <widget class="QLabel" name="passwordLabel">
+         <property name="text">
+          <string>Password</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
+        <widget class="QLineEdit" name="passwordInput">
+         <property name="echoMode">
+          <enum>QLineEdit::Password</enum>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="2">
+        <widget class="QPushButton" name="btnConnect">
+         <property name="text">
+          <string>Connect</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="0" colspan="3">
+        <widget class="QTreeWidget" name="treeCubes">
+         <property name="toolTip">
+          <string>Click to select/unselect the cube</string>
+         </property>
+         <property name="editTriggers">
+          <set>QAbstractItemView::NoEditTriggers</set>
+         </property>
+         <property name="alternatingRowColors">
+          <bool>true</bool>
+         </property>
+         <property name="rootIsDecorated">
+          <bool>false</bool>
+         </property>
+         <property name="itemsExpandable">
+          <bool>false</bool>
+         </property>
+         <property name="sortingEnabled">
+          <bool>false</bool>
+         </property>
+         <property name="allColumnsShowFocus">
+          <bool>true</bool>
+         </property>
+         <attribute name="headerStretchLastSection">
+          <bool>true</bool>
+         </attribute>
+         <column>
+          <property name="text">
+           <string>State</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Cube name</string>
+          </property>
+         </column>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tabDimensions">
+      <attribute name="title">
+       <string>Query</string>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayout">
+       <item row="3" column="1">
+        <widget class="QTextEdit" name="cqlExpr">
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>60</height>
+          </size>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="2">
+        <widget class="QPushButton" name="btnExecute">
+         <property name="text">
+          <string>Execute Query</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0" colspan="3">
+        <widget class="QTreeWidget" name="treeDimensions">
+         <property name="toolTip">
+          <string>Click to select/unselect the member</string>
+         </property>
+         <property name="editTriggers">
+          <set>QAbstractItemView::NoEditTriggers</set>
+         </property>
+         <property name="alternatingRowColors">
+          <bool>true</bool>
+         </property>
+         <property name="rootIsDecorated">
+          <bool>false</bool>
+         </property>
+         <property name="itemsExpandable">
+          <bool>true</bool>
+         </property>
+         <property name="sortingEnabled">
+          <bool>false</bool>
+         </property>
+         <property name="allColumnsShowFocus">
+          <bool>true</bool>
+         </property>
+         <attribute name="headerStretchLastSection">
+          <bool>false</bool>
+         </attribute>
+         <column>
+          <property name="text">
+           <string>Selected</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Member</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Code</string>
+          </property>
+         </column>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+<connections>
     <connection>
       <sender>btnConnect</sender>
       <signal>clicked()</signal>
@@ -243,5 +215,4 @@
       <slot>exprShown()</slot>
     </connection>
   </connections>
-
 </ui>
