@@ -15,9 +15,7 @@ From the git repository:
 * Download the code from `https://github.com/lmorandini/SDMXPlugin` by clicking on "releases" and downloading the lastest as a ZIP file
 * Decompress the zip file.
 * Rename decompressed folder to SDMXPlugin
-* Copy the plugin folder to `$HOME/.qgis2/python/plugins/`
-* Open a terminal window and move to `$HOME/.qgis2/python/plugins/SDMXPlugin`
-* Execute `make install`
+* Copy the plugin folder to `$HOME/.qgis3/python/plugins/` (`<QGIS directory>\apps\qgis\python\plugins` under Windowss)
 * Start QGIS (version 3.0 onwards)
 * Load the SDMX Plugin by checking it on the list of plugins that can be accessed by selecting the 
   "Plugins / Manage and install plugins..." nenu item
@@ -37,4 +35,6 @@ From the git repository:
 * Click on "Execute" button 
 * The plugin should now execute an WFS query and add a geometry-less layer to the list of layers in QGIS
 * Provided the query was executed correctly, a right-click, "Open Attribute Table" of the just-added layer shouls show the query response
+* NOTE: the result tables are meant to be temporary (CSV files are written the temporary directory of your system), to make them persistent, export them using QGIS
+ 
 

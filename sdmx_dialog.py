@@ -21,7 +21,7 @@
  ***************************************************************************/
 """
 from __future__ import absolute_import
-
+from pathlib import Path
 from builtins import range
 import os, functools, requests, tempfile
 from urllib.parse import unquote
@@ -152,7 +152,7 @@ class SDMXPluginDialog(QDialog, FORM_CLASS):
         tmpCsv = tempfile.NamedTemporaryFile(mode='w', suffix='.csv', prefix='sdmx-', delete=False)
         tmpCsv.write(response.text)
         tmpCsv.close()
-        table = QgsVectorLayer('file://' + tmpCsv.name, 'SDMX:: ' + self.cqlExpr.toPlainText(), 'delimitedtext')
+        table = QgsVectorLayer(Path(tmpCsv.name).as_uri(), 'SDMX:: ' + self.cqlExpr.toPlainText(), 'delimitedtext')
         QgsProject.instance().addMapLayer(table)
 
     # FIXME: this would be handy to load the WFS URL from QGIS settings, excepts it does not work in QGSI3
